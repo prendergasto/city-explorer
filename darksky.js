@@ -1,4 +1,4 @@
-export.modules = {
+module.exports = {
     "latitude": 47.8209301,
     "longitude": -122.3151314,
     "timezone": "America/Los_Angeles",
