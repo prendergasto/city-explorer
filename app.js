@@ -53,6 +53,7 @@ const getWeatherData = async(lat, lng) => {
         };
     });
 } ;
+
 app.get('/weather', async(req, res, next) => {
     // use the lat and lng from earlier to get weather data for the selected area
     try {
@@ -74,7 +75,12 @@ const getYelpData = async(lat, lng) => {
     return yelpData.body.businesses.map(business => {
         return {
             name: business.name,
-            rating: business.rating
+            image_url: business.image_url,
+            price: business.price,
+            rating: business.rating,
+            url: business.url,
+            // image_url: business.image_url,
+            // location: business.location.address1
         };
     });
 
@@ -104,8 +110,7 @@ const getEventData = async(lat, lng) => {
             link: events.url,
             name: events.title,
             event_date: events.start_time,
-            venue: events.venue_name,
-            summary: events.summary
+            summary: events.venue_address
 
         };
     });
@@ -123,3 +128,36 @@ app.get('/events', async(req, res, next) => {
     }
 });
 
+
+const getHikingData = async(req, res, next) => {
+    const URL = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lng}&maxDistance=10&key=${process.env.TRAIL_API_KEY}`;
+    const hikingData = await request.get(URL);
+
+    const nearbyHikes = JSON.parse(hikingData.text);
+
+    return nearbyHikes.trails.map(hikes => {
+        return {
+            name: hikes.name,
+            location: hikes.location,
+            length: hikes.length,
+            stars: hikes.stars,
+            star_votes:hikes.starVotes,
+            summary: hikes.summary,
+            trail_url: hikes.url,
+            conditions: hikes.conditionDetails,
+            condition_date: hikes.conditionDate,
+            condition_time: hikes.conditionTime
+            
+        };
+    });
+};
+
+app.get('/trails', async(req, res, next) => {
+    try {
+        const hikes = await getHikingData(lat, lng);
+
+        res.json(hikes);
+    } catch (err) {
+        next(err);
+    }
+});
