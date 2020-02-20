@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const weather = require('./darksky.js');
+// const weather = require('./darksky.js');
 const request = require('superagent');
 const cors = require('cors');
 const app = express();
@@ -65,10 +65,61 @@ app.get('/weather', async(req, res, next) => {
     }
 });
 
-const getYelpData = async
 
-app.get('/yelp', async(req, res, next) => {
+const getYelpData = async(lat, lng) => {
+    const yelpData = await request
+        .get(`https://api.yelp.com/v3/businesses/search?latitude=${lat}&longitude=${lng}`)
+        .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`);
+    
+    return yelpData.body.businesses.map(business => {
+        return {
+            name: business.name,
+            rating: business.rating
+        };
+    });
+
+};
+
+app.get('/reviews', async(req, res, next) => {
     try {
-        const yelpData = await getYelpData()
+        
+        const businessList = await getYelpData(lat, lng);
+        
+        res.json(businessList);
+    
+    } catch (err) {
+        next(err);
     }
-})
+});
+
+const getEventData = async(lat, lng) => {
+
+    const URL = `http://api.eventful.com/json/events/search?app_key=${process.env.EVENTFUL_API_KEY}&where=${lat},${lng}&within=25&page_size=20&page_number=1`;
+    const eventData = await request.get(URL);
+        
+    const nearbyEvents = JSON.parse(eventData.text);
+
+    return nearbyEvents.events.event.map(events => {
+        return {
+            link: events.url,
+            name: events.title,
+            event_date: events.start_time,
+            venue: events.venue_name,
+            summary: events.summary
+
+        };
+    });
+   
+
+};
+
+app.get('/events', async(req, res, next) => {
+    try {
+        const events = await getEventData(lat, lng);
+
+        res.json(events);
+    } catch (err) {
+        next(err);
+    }
+});
+
