@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "jest": "^25.1.0",
+    "nodemon": "^2.0.2",
     "superagent": "^5.2.2",
     "supertest": "^4.0.2"
   }
